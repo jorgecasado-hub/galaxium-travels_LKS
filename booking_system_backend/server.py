@@ -1,6 +1,8 @@
 from contextlib import asynccontextmanager
-from fastapi import FastAPI, Depends
+from fastapi import FastAPI, Depends, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
+from fastapi.exceptions import RequestValidationError
 from fastmcp import FastMCP
 from sqlalchemy.orm import Session
 from typing import Union
@@ -129,6 +131,25 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+@app.exception_handler(RequestValidationError)
+async def validation_exception_handler(request: Request, exc: RequestValidationError):
+    """Return a clear ErrorResponse when request validation fails, with email format hint."""
+    for error in exc.errors():
+        if "email" in str(error.get("loc", "")):
+            return JSONResponse(
+                status_code=200,
+                content=ErrorResponse(
+                    error="Invalid email format",
+                    error_code="INVALID_EMAIL",
+                    details="The email address is not valid. Please use the format usuario@dominio.com (e.g. alice@example.com)."
+                ).model_dump(),
+            )
+    return JSONResponse(
+        status_code=422,
+        content={"detail": exc.errors()},
+    )
 
 
 @app.get("/", tags=["Health"])
