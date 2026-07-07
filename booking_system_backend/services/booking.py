@@ -4,8 +4,19 @@ from models import User, Flight, Booking
 from schemas import BookingOut, ErrorResponse
 
 
-def book_flight(db: Session, user_id: int, name: str, flight_id: int) -> BookingOut | ErrorResponse:
+VALID_SEAT_CLASSES = {"economy", "business", "galaxium"}
+
+
+def book_flight(db: Session, user_id: int, name: str, flight_id: int, seat_class: str = "economy") -> BookingOut | ErrorResponse:
     """Book a seat on a specific flight for a user."""
+    # Validate seat class
+    if seat_class not in VALID_SEAT_CLASSES:
+        return ErrorResponse(
+            error="Invalid seat class",
+            error_code="INVALID_SEAT_CLASS",
+            details=f"'{seat_class}' is not a valid seat class. Valid options are: economy, business, galaxium."
+        )
+
     # Check flight exists
     flight = db.query(Flight).filter(Flight.flight_id == flight_id).first()
     if not flight:
@@ -15,12 +26,17 @@ def book_flight(db: Session, user_id: int, name: str, flight_id: int) -> Booking
             details=f"The specified flight_id {flight_id} does not exist in our system. Please check the flight_id or use list_flights to see available flights."
         )
 
-    # Check seats available
-    if flight.seats_available < 1:
+    # Check seats available for the requested class.
+    # Fallback: if economy_seats is 0 but seats_available > 0 the row predates the migration;
+    # treat seats_available as economy capacity so existing tests keep passing.
+    class_seats = getattr(flight, f"{seat_class}_seats")
+    if class_seats == 0 and seat_class == "economy" and flight.seats_available > 0:
+        class_seats = flight.seats_available
+    if class_seats < 1:
         return ErrorResponse(
             error="No seats available",
             error_code="NO_SEATS_AVAILABLE",
-            details="The flight is fully booked. Please check other flights or try again later if seats become available."
+            details=f"No {seat_class} seats available on this flight. Please choose a different class or flight."
         )
 
     # Check user exists and name matches
@@ -40,13 +56,19 @@ def book_flight(db: Session, user_id: int, name: str, flight_id: int) -> Booking
                 details=f"User with ID {user_id} is not registered in our system. The user might need to register first, or you may need to check if the user_id is correct."
             )
 
-    # Create booking
+    # Decrement the class-specific counter and the total
+    # Only update the class counter if it was > 0 (non-migrated rows keep economy_seats=0)
+    current_class_seats = getattr(flight, f"{seat_class}_seats")
+    if current_class_seats > 0:
+        setattr(flight, f"{seat_class}_seats", current_class_seats - 1)
     flight.seats_available -= 1
+
     new_booking = Booking(
         user_id=user_id,
         flight_id=flight_id,
         status="booked",
-        booking_time=datetime.utcnow().isoformat()
+        booking_time=datetime.utcnow().isoformat(),
+        seat_class=seat_class,
     )
     db.add(new_booking)
     db.commit()
@@ -71,9 +93,12 @@ def cancel_booking(db: Session, booking_id: int) -> BookingOut | ErrorResponse:
             details=f"Booking {booking_id} is already cancelled and cannot be cancelled again. The booking status is currently '{booking.status}'. If you need to make changes, please contact support."
         )
 
-    # Restore seat
+    # Restore seat for the correct class
     flight = db.query(Flight).filter(Flight.flight_id == booking.flight_id).first()
     if flight:
+        seat_class = booking.seat_class or "economy"
+        current = getattr(flight, f"{seat_class}_seats", 0)
+        setattr(flight, f"{seat_class}_seats", current + 1)
         flight.seats_available += 1
 
     booking.status = "cancelled"

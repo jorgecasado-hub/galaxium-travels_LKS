@@ -27,17 +27,30 @@ def seed():
     db.add_all(users)
     db.commit()
     # Add demo flights
+    def make_flight(origin, destination, departure_time, arrival_time, price, seats_available,
+                    business_multiplier=2.0, galaxium_multiplier=4.0):
+        economy = seats_available
+        business = max(1, seats_available // 3)
+        galaxium = max(1, seats_available // 5)
+        return Flight(
+            origin=origin, destination=destination,
+            departure_time=departure_time, arrival_time=arrival_time,
+            price=price, seats_available=seats_available,
+            economy_seats=economy, business_seats=business, galaxium_seats=galaxium,
+            business_multiplier=business_multiplier, galaxium_multiplier=galaxium_multiplier,
+        )
+
     flights = [
-        Flight(origin="Earth", destination="Mars", departure_time="2099-01-01T09:00:00Z", arrival_time="2099-01-01T17:00:00Z", price=1000000, seats_available=5),
-        Flight(origin="Earth", destination="Moon", departure_time="2099-01-02T10:00:00Z", arrival_time="2099-01-02T14:00:00Z", price=500000, seats_available=3),
-        Flight(origin="Mars", destination="Earth", departure_time="2099-01-03T12:00:00Z", arrival_time="2099-01-03T20:00:00Z", price=950000, seats_available=7),
-        Flight(origin="Venus", destination="Earth", departure_time="2099-01-04T08:00:00Z", arrival_time="2099-01-04T18:00:00Z", price=1200000, seats_available=2),
-        Flight(origin="Jupiter", destination="Europa", departure_time="2099-01-05T15:00:00Z", arrival_time="2099-01-05T19:00:00Z", price=2000000, seats_available=1),
-        Flight(origin="Earth", destination="Venus", departure_time="2099-01-06T07:00:00Z", arrival_time="2099-01-06T15:00:00Z", price=1100000, seats_available=4),
-        Flight(origin="Moon", destination="Mars", departure_time="2099-01-07T11:00:00Z", arrival_time="2099-01-07T19:00:00Z", price=800000, seats_available=6),
-        Flight(origin="Mars", destination="Jupiter", departure_time="2099-01-08T13:00:00Z", arrival_time="2099-01-08T23:00:00Z", price=2500000, seats_available=2),
-        Flight(origin="Europa", destination="Earth", departure_time="2099-01-09T09:00:00Z", arrival_time="2099-01-09T21:00:00Z", price=3000000, seats_available=3),
-        Flight(origin="Earth", destination="Pluto", departure_time="2099-01-10T06:00:00Z", arrival_time="2099-01-11T06:00:00Z", price=5000000, seats_available=1),
+        make_flight("Earth",   "Mars",    "2099-01-01T09:00:00Z", "2099-01-01T17:00:00Z", 1000000, 5),
+        make_flight("Earth",   "Moon",    "2099-01-02T10:00:00Z", "2099-01-02T14:00:00Z",  500000, 3),
+        make_flight("Mars",    "Earth",   "2099-01-03T12:00:00Z", "2099-01-03T20:00:00Z",  950000, 7),
+        make_flight("Venus",   "Earth",   "2099-01-04T08:00:00Z", "2099-01-04T18:00:00Z", 1200000, 2),
+        make_flight("Jupiter", "Europa",  "2099-01-05T15:00:00Z", "2099-01-05T19:00:00Z", 2000000, 1),
+        make_flight("Earth",   "Venus",   "2099-01-06T07:00:00Z", "2099-01-06T15:00:00Z", 1100000, 4),
+        make_flight("Moon",    "Mars",    "2099-01-07T11:00:00Z", "2099-01-07T19:00:00Z",  800000, 6),
+        make_flight("Mars",    "Jupiter", "2099-01-08T13:00:00Z", "2099-01-08T23:00:00Z", 2500000, 2),
+        make_flight("Europa",  "Earth",   "2099-01-09T09:00:00Z", "2099-01-09T21:00:00Z", 3000000, 3),
+        make_flight("Earth",   "Pluto",   "2099-01-10T06:00:00Z", "2099-01-11T06:00:00Z", 5000000, 1),
     ]
     db.add_all(flights)
     db.commit()

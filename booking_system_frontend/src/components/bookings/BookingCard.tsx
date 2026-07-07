@@ -1,8 +1,23 @@
-import type { Booking, Flight } from '../../types';
+import type { Booking, Flight, SeatClass } from '../../types';
 import { Card, Button } from '../common';
 import { Plane, Calendar, CheckCircle, XCircle, Clock } from 'lucide-react';
 import { formatDate, formatCurrency } from '../../utils/formatters';
 import { motion } from 'framer-motion';
+
+const SEAT_CLASS_BADGE: Record<SeatClass, { label: string; className: string }> = {
+  economy: {
+    label: 'Economy',
+    className: 'bg-blue-500/20 text-blue-300 border border-blue-400/40',
+  },
+  business: {
+    label: 'Business',
+    className: 'bg-amber-500/20 text-amber-300 border border-amber-400/40',
+  },
+  galaxium: {
+    label: '✦ Galaxium',
+    className: 'bg-purple-500/20 text-purple-300 border border-purple-400/40',
+  },
+};
 
 interface BookingCardProps {
   booking: Booking;
@@ -64,6 +79,16 @@ export const BookingCard = ({ booking, flight, onCancel, isCancelling }: Booking
               </div>
             </div>
           </div>
+          {/* Seat class badge */}
+          {(() => {
+            const cls = booking.seat_class ?? 'economy';
+            const badge = SEAT_CLASS_BADGE[cls as SeatClass] ?? SEAT_CLASS_BADGE.economy;
+            return (
+              <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${badge.className}`}>
+                {badge.label}
+              </span>
+            );
+          })()}
         </div>
 
         {/* Flight Details */}
@@ -92,9 +117,15 @@ export const BookingCard = ({ booking, flight, onCancel, isCancelling }: Booking
             </div>
 
             <div className="flex items-center justify-between pt-3 border-t border-white/10">
-              <span className="text-sm text-star-white/60">Price</span>
+              <span className="text-sm text-star-white/60">Base price</span>
               <span className="text-lg font-bold text-star-white">
-                {formatCurrency(flight.price)}
+                {formatCurrency(
+                  booking.seat_class === 'business'
+                    ? Math.round(flight.price * (flight.business_multiplier ?? 2))
+                    : booking.seat_class === 'galaxium'
+                    ? Math.round(flight.price * (flight.galaxium_multiplier ?? 4))
+                    : flight.price
+                )}
               </span>
             </div>
           </div>

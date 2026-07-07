@@ -25,6 +25,12 @@ export const UserIdentification = ({ isOpen, onClose, onSuccess }: UserIdentific
       return;
     }
 
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email.trim())) {
+      toast.error('Please enter a valid email address (e.g. user@domain.com)');
+      return;
+    }
+
     setIsLoading(true);
 
     try {

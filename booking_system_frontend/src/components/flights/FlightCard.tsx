@@ -1,6 +1,6 @@
 import type { Flight } from '../../types';
 import { Card, Button } from '../common';
-import { Plane, Clock, DollarSign, Users } from 'lucide-react';
+import { Plane, Clock, Users } from 'lucide-react';
 import { formatCurrency, formatDate, formatTime, calculateDuration } from '../../utils/formatters';
 import { motion } from 'framer-motion';
 
@@ -9,9 +9,36 @@ interface FlightCardProps {
   onBook: (flight: Flight) => void;
 }
 
+const CLASS_STYLES = [
+  {
+    label: 'Economy',
+    seatsKey: 'economy_seats' as const,
+    multiplierKey: null as null,
+    textColor: 'text-blue-300',
+    dotColor: 'bg-blue-400',
+  },
+  {
+    label: 'Business',
+    seatsKey: 'business_seats' as const,
+    multiplierKey: 'business_multiplier' as const,
+    textColor: 'text-amber-300',
+    dotColor: 'bg-amber-400',
+  },
+  {
+    label: 'Galaxium',
+    seatsKey: 'galaxium_seats' as const,
+    multiplierKey: 'galaxium_multiplier' as const,
+    textColor: 'text-purple-300',
+    dotColor: 'bg-purple-400',
+  },
+] as const;
+
 export const FlightCard = ({ flight, onBook }: FlightCardProps) => {
-  const isLowSeats = flight.seats_available <= 2;
-  const isSoldOut = flight.seats_available === 0;
+  const economySeats = flight.economy_seats ?? flight.seats_available;
+  const businessSeats = flight.business_seats ?? 0;
+  const galaxiumSeats = flight.galaxium_seats ?? 0;
+  const totalSeats = economySeats + businessSeats + galaxiumSeats;
+  const isSoldOut = totalSeats === 0;
 
   return (
     <motion.div
@@ -70,21 +97,37 @@ export const FlightCard = ({ flight, onBook }: FlightCardProps) => {
             </span>
           </div>
 
-          {/* Price */}
-          <div className="flex items-center gap-2">
-            <DollarSign size={16} className="text-alien-green" />
-            <span className="text-2xl font-bold text-star-white">
-              {formatCurrency(flight.price)}
-            </span>
-            <span className="text-sm text-star-white/60">per seat</span>
-          </div>
-
-          {/* Seats Available */}
-          <div className="flex items-center gap-2">
-            <Users size={16} className={isLowSeats ? 'text-solar-orange' : 'text-star-white/70'} />
-            <span className={`text-sm ${isLowSeats ? 'text-solar-orange font-semibold' : 'text-star-white/70'}`}>
-              {isSoldOut ? 'Sold Out' : `${flight.seats_available} seats available`}
-            </span>
+          {/* Seat Classes */}
+          <div className="space-y-1.5 pt-1">
+            <div className="flex items-center gap-1.5 text-xs text-star-white/50 mb-1">
+              <Users size={13} />
+              <span>Seat availability by class</span>
+            </div>
+            {CLASS_STYLES.map(({ label, seatsKey, multiplierKey, textColor, dotColor }) => {
+              const seats = seatsKey === 'economy_seats' ? economySeats : flight[seatsKey] ?? 0;
+              const price = multiplierKey
+                ? Math.round(flight.price * (flight[multiplierKey] ?? (multiplierKey === 'business_multiplier' ? 2 : 4)))
+                : flight.price;
+              const isClassSoldOut = seats === 0;
+              return (
+                <div
+                  key={label}
+                  className={`flex items-center justify-between text-xs ${isClassSoldOut ? 'opacity-40' : ''}`}
+                >
+                  <div className="flex items-center gap-1.5">
+                    <span className={`w-2 h-2 rounded-full ${dotColor}`} />
+                    <span className={`font-medium ${textColor}`}>{label}</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-star-white/70">
+                    <span className="font-semibold text-star-white/90">
+                      {formatCurrency(price)}
+                    </span>
+                    <span>·</span>
+                    <span>{isClassSoldOut ? 'Sold out' : `${seats} left`}</span>
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </div>
 

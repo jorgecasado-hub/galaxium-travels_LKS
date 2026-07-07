@@ -6,10 +6,11 @@ A modern, space-themed frontend for the Galaxium Travels interplanetary booking 
 
 - **Modern UI/UX**: Beautiful space-themed interface with animated starfield background
 - **Responsive Design**: Works seamlessly on mobile, tablet, and desktop
-- **Real-time Updates**: Live flight availability and booking status
+- **Seat Classes**: Economy, Business and Galaxium selector in booking modal with real-time price update
+- **Real-time Updates**: Live flight availability and booking status per class
 - **User Management**: Simple name/email authentication
 - **Flight Booking**: Browse, search, and book interplanetary flights
-- **Booking Management**: View and cancel your bookings
+- **Booking Management**: View bookings with seat class badge and cancel reservations
 - **Toast Notifications**: User-friendly feedback for all actions
 - **Smooth Animations**: Framer Motion powered transitions
 
@@ -141,11 +142,12 @@ The frontend connects to the backend API with the following endpoints:
 
 ### Booking a Flight
 
-1. Browse available flights on the Flights page
+1. Browse available flights on the Flights page — each card shows Economy / Business / Galaxium prices and seat counts
 2. Click "Book Now" on desired flight
 3. Sign in or register (if not already logged in)
-4. Confirm booking details
-5. Receive confirmation and view in My Bookings
+4. Select your cabin class (price updates in real time)
+5. Confirm booking details
+6. Receive confirmation and view in My Bookings with a class badge
 
 ### Managing Bookings
 

@@ -6,9 +6,10 @@ A complete full-stack application for booking interplanetary space travel, featu
 
 - **Modern Space-Themed UI** - Beautiful, responsive interface with animated starfield
 - **Full Booking System** - Browse flights, make bookings, manage reservations
+- **Seat Classes** - Three cabin classes: Economy, Business and Galaxium (first class) with individual inventory and price multipliers
 - **Dual Protocol Backend** - REST API and MCP (Model Context Protocol) support
 - **Type-Safe** - Full TypeScript frontend and Python type hints
-- **Real-Time Updates** - Live flight availability and booking status
+- **Real-Time Updates** - Live flight availability and booking status per class
 - **User Management** - Simple name/email authentication
 - **Production Ready** - Optimized builds and comprehensive error handling
 
@@ -107,17 +108,18 @@ See [booking_system_frontend/README.md](booking_system_frontend/README.md) for:
 
 ### Booking a Flight
 
-1. **Browse Flights** - Navigate to the Flights page to see all available routes
+1. **Browse Flights** - Navigate to the Flights page to see all available routes; each flight shows Economy / Business / Galaxium availability and prices
 2. **Search & Filter** - Use the search bar to find specific destinations
 3. **Sign In/Register** - Click "Book Now" and enter your name and email
-4. **Confirm Booking** - Review flight details and confirm your reservation
-5. **Manage Bookings** - View and cancel bookings from "My Bookings" page
+4. **Select Class** - Choose Economy, Business or Galaxium; price updates in real time
+5. **Confirm Booking** - Review flight details and confirm your reservation
+6. **Manage Bookings** - View bookings with seat class badge and cancel from "My Bookings"
 
 ### Demo Data
 
 The system comes pre-seeded with:
 - **10 Users** - Alice, Bob, Charlie, Diana, Eve, Frank, Grace, Heidi, Ivan, Judy
-- **10 Flights** - Routes between Earth, Mars, Moon, Venus, Jupiter, Europa, Pluto
+- **10 Flights** - Routes between Earth, Mars, Moon, Venus, Jupiter, Europa, Pluto — each with Economy / Business / Galaxium inventory and price multipliers (×2 Business, ×4 Galaxium)
 - **20 Sample Bookings** - Various booking statuses
 
 ## 🛠️ Technology Stack

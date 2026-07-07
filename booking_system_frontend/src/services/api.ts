@@ -40,8 +40,21 @@ api.interceptors.response.use(
  * Get all available flights
  */
 export const getFlights = async (): Promise<Flight[]> => {
-  const response = await api.get<Flight[]>('/flights');
-  return response.data;
+  let lastError: unknown;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    try {
+      const response = await api.get<Flight[]>('/flights');
+      return response.data;
+    } catch (error) {
+      lastError = error;
+      if (attempt < 2) {
+        await new Promise((resolve) =>
+          setTimeout(resolve, Math.pow(2, attempt) * 1000)
+        );
+      }
+    }
+  }
+  throw lastError;
 };
 
 // ==================== User Endpoints ====================

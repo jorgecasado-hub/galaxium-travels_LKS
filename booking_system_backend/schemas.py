@@ -10,6 +10,11 @@ class FlightOut(BaseModel):
     arrival_time: str
     price: int
     seats_available: int
+    economy_seats: int = 0
+    business_seats: int = 0
+    galaxium_seats: int = 0
+    business_multiplier: float = 2.0
+    galaxium_multiplier: float = 4.0
 
     class Config:
         from_attributes = True
@@ -19,6 +24,7 @@ class BookingRequest(BaseModel):
     user_id: int
     name: str
     flight_id: int
+    seat_class: str = "economy"
 
 
 class BookingOut(BaseModel):
@@ -27,6 +33,7 @@ class BookingOut(BaseModel):
     flight_id: int
     status: str
     booking_time: str
+    seat_class: str = "economy"
 
     class Config:
         from_attributes = True

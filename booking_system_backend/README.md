@@ -6,6 +6,8 @@ A unified booking system for Galaxium Travels that serves both **REST API** and 
 
 - **Dual Protocol Support**: Same business logic exposed via REST and MCP
 - **Single Server**: One codebase, one port, both protocols
+- **Seat Classes**: Economy, Business and Galaxium with individual seat inventory and configurable price multipliers
+- **Incremental Migrations**: `migrate.py` adds new columns without losing existing data
 - **SQLite Database**: Simple file-based storage for demos
 - **Demo Data**: Pre-seeded with space travel flights and users
 
@@ -66,10 +68,10 @@ curl -X POST http://localhost:8080/api/register \
   -H "Content-Type: application/json" \
   -d '{"name": "John Doe", "email": "john@example.com"}'
 
-# Book a flight
+# Book a flight (seat_class: economy | business | galaxium)
 curl -X POST http://localhost:8080/api/book \
   -H "Content-Type: application/json" \
-  -d '{"user_id": 1, "name": "Alice", "flight_id": 1}'
+  -d '{"user_id": 1, "name": "Alice", "flight_id": 1, "seat_class": "business"}'
 
 # Get bookings
 curl http://localhost:8080/api/bookings/1
@@ -85,7 +87,7 @@ Connect to `http://localhost:8080/mcp` and use the available tools:
 ```
 list_flights()
 register_user(name="John Doe", email="john@example.com")
-book_flight(user_id=1, name="Alice", flight_id=1)
+book_flight(user_id=1, name="Alice", flight_id=1, seat_class="galaxium")
 get_bookings(user_id=1)
 cancel_booking(booking_id=1)
 ```
@@ -110,13 +112,14 @@ pytest tests/test_rest.py
 booking_system/
 ├── server.py          # Main server - exposes REST & MCP
 ├── services/          # Business logic layer
-│   ├── booking.py     # Booking operations
+│   ├── booking.py     # Booking operations (seat class aware)
 │   ├── flight.py      # Flight operations
 │   └── user.py        # User operations
-├── models.py          # SQLAlchemy ORM models
+├── models.py          # SQLAlchemy ORM models (Flight + Booking with seat classes)
 ├── schemas.py         # Pydantic request/response schemas
 ├── db.py              # Database configuration
-├── seed.py            # Demo data seeding
+├── seed.py            # Demo data seeding (with per-class inventory)
+├── migrate.py         # Incremental DB migration script
 ├── tests/             # Test suite
 │   ├── test_services.py
 │   └── test_rest.py
@@ -129,7 +132,7 @@ booking_system/
 
 The server seeds the database with:
 - **10 users**: Alice, Bob, Charlie, Diana, Eve, Frank, Grace, Heidi, Ivan, Judy
-- **10 flights**: Interplanetary routes (Earth, Mars, Moon, Venus, Jupiter, Europa, Pluto)
+- **10 flights**: Interplanetary routes (Earth, Mars, Moon, Venus, Jupiter, Europa, Pluto) — each with Economy / Business / Galaxium seat inventory and price multipliers (×2 Business, ×4 Galaxium)
 - **20 bookings**: Random bookings across users and flights
 doc
 ## Docker

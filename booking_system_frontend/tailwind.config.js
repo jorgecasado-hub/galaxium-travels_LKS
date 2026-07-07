@@ -9,7 +9,7 @@ export default {
       colors: {
         'space-dark': '#030712',
         'space-blue': '#0A1929',
-        'cosmic-purple': '#6366F1',
+        'cosmic-purple': '#A855F7',
         'nebula-pink': '#EC4899',
         'alien-green': '#10B981',
         'solar-orange': '#F59E0B',
